@@ -1,0 +1,251 @@
+import re
+
+
+def start_menu():
+    print('/////Contact Menu\\\\\\\\\\')
+    print('1.Search for contact')
+    print('2.Create new contact')
+    print('3.Display contact')
+    print('4.Edit Contact')
+    print('5.Delete Contact')
+    print('6.Show All Contacts')
+    print('7.Exit')
+
+
+def contact_finder(book, contact):
+    if contact in book:
+        return True
+
+
+def name_validator(book, name):
+    while True:
+        if name == 'cancel':
+            return 'cancel'
+
+        elif name in book:
+            print('Invalid Name! This name already exist.')
+            print('If you want to go back, type \'cancel\'')
+            name = input('Try again:')
+            print()
+        else:
+            break
+    return name
+
+
+def phone_number_validator(number):
+    phone_pattern = r'^\d{10}$'
+    while True:
+        the_match = re.findall(phone_pattern, number)
+        if the_match:
+            return number
+        else:
+            print('Invalid phone number. Only 10 digits!')
+            number = input('Try again:')
+            print()
+
+
+def email_validator(email):
+    email_pattern = r"([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+"
+    while True:
+        match = re.findall(email_pattern, email)
+        if match:
+            return email
+        elif email == "":
+            return None
+        else:
+            print('Invalid Email!')
+            email = input('Try again:')
+            print()
+
+
+def new_contact(book):
+    new_contact_name = input('Enter contact name*:')
+    new_contact_name = name_validator(book, new_contact_name)
+    phone_number = input('Enter phone number*:')
+    phone_number = phone_number_validator(phone_number)
+    email_address = input('Enter Email address:')
+    email_address = email_validator(email_address)
+    company = input('Enter company:')
+    print()
+    if company == "":
+        company = None
+    book[new_contact_name] = [phone_number, email_address, company]
+
+
+def display_contact(book, contact):
+    contact_info = book[contact]
+    print(f"---Contact Name: {contact}")
+    print(f"---Contact Phone number: {contact_info[0]}")
+    print(f"---Contact Email address: {contact_info[1]}")
+    print(f"---Contact Company: {contact_info[2]}")
+
+
+def option_for_edit():
+    print('1.Yes')
+    print('2.No')
+    answer = input('Do you wont to Edit this contact?')
+    print()
+    if answer == "1":
+        return True
+    else:
+        return False
+
+
+def edit_name_validator(book, name):
+    while True:
+        if name == 'cancel':
+            return 'cancel'
+
+        elif name not in book:
+            print('Invalid Name! This name do not exist.')
+            print('If you want to go back, type \'cancel\'')
+            name = input('Try again:')
+            print()
+        else:
+            break
+    return name
+
+
+def edit(book, contact):
+    current_contact = contact
+    current_number = book[contact][0]
+    current_email = book[contact][1]
+    current_company = book[contact][2]
+    while True:
+        print('     Current Contact:     ')
+        display_contact(book, contact)
+        print('1.Contact Name')
+        print('2.Phone Number')
+        print('3.Email Address')
+        print('4.Company')
+        print('5.Nothing')
+        print()
+        edit_wish = input('What do you want to Edit?')
+        if edit_wish == "cancel":
+            continue
+        print()
+        if edit_wish == "1":
+            new_contact_name = input('Enter the New Contact Name:')
+            print()
+            current_contact = name_validator(book, new_contact_name)
+            if current_contact == 'cancel':
+                continue
+            del book[contact]
+            book[current_contact] = [current_number, current_email, current_company]
+            contact = current_contact
+            continue
+
+        elif edit_wish == "2":
+            new_phone_number = input('Enter the New Phone Number:')
+            current_number = phone_number_validator(new_phone_number)
+            if current_number == "cancel":
+                continue
+            book[contact][0] = current_number
+            continue
+        elif edit_wish == "3":
+            new_email_address = input('Enter the New Email Address:')
+            new_email_address = email_validator(new_email_address)
+            book[contact][1] = new_email_address
+            continue
+        elif edit_wish == "4":
+            new_company = input('Enter the New Company:')
+            if new_company == "":
+                new_company = None
+            book[contact][2] = new_company
+            continue
+        elif edit_wish == "5":
+            break
+
+
+def exit():
+    print('1.Yes')
+    print('2.No')
+    answer = input('Are you sure you want to quit?')
+    if answer == '1':
+        return True
+    else:
+        return False
+
+
+def checks_for_length(book):
+    if len(book) == 0:
+        print('There is not contacts in the contacts book yet!')
+        print()
+        return True
+    else:
+        return False
+
+
+contact_book = {}
+while True:
+    start_menu()
+    user_choice = input('Please enter your choice:')
+    print()
+    if user_choice == '1':
+        if checks_for_length(contact_book):
+            continue
+
+        searched_contact = input('Search:')
+        if searched_contact == "cancel":
+            continue
+
+        if searched_contact in contact_book:
+            print(f'--{searched_contact}\'s number is {contact_book[searched_contact][0]}--')
+            print()
+        else:
+            print('The searched contact is not in contact book!')
+            print()
+        continue
+    elif user_choice == '2':
+        new_contact(contact_book)
+        continue
+    elif user_choice == '3':
+        if checks_for_length(contact_book):
+            continue
+        searched_contact = input('Contact name:')
+        searched_contact = edit_name_validator(contact_book, searched_contact)
+        print()
+        if searched_contact == 'cancel':
+            continue
+        if contact_finder(contact_book, searched_contact):
+            display_contact(contact_book, searched_contact)
+            if option_for_edit():
+                edit(contact_book, searched_contact)
+
+        else:
+            print('The searched contact is not in contact book!')
+        continue
+
+    elif user_choice == "4":
+        if checks_for_length(contact_book):
+            continue
+        contact_for_edit = input('What is the name of the contact for editing?')
+        contact_for_edit = edit_name_validator(contact_book, contact_for_edit)
+        if contact_for_edit == 'cancel':
+            continue
+        edit(contact_book, contact_for_edit)
+    elif user_choice == "5":
+        if checks_for_length(contact_book):
+            continue
+        name_for_delete = input('Which contact do you want to Delete?')
+        name_for_delete = edit_name_validator(contact_book, name_for_delete)
+        if name_for_delete == 'cancel':
+            continue
+        del contact_book[name_for_delete]
+        print(f'You successfully deleted {name_for_delete} from your contacts')
+        print()
+    elif user_choice == '6':
+        if checks_for_length(contact_book):
+            continue
+        [print(f'{contacts} - {contacts_info[0]},{contacts_info[1]}, {contacts_info[2]}') for contacts, contacts_info in contact_book.items()]
+        print()
+
+    elif user_choice == '7':
+        if exit():
+            break
+    else:
+        print('That is wrong input! Try again.')
+        print()
+        continue
+
+
